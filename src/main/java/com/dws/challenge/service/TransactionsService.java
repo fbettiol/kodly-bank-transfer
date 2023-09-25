@@ -37,7 +37,7 @@ public class TransactionsService {
 	public void transferMoney(final String sourceAccountId, final String targetAccountId, final BigDecimal amount) {
 
 		// To avoid deadlocks/race-conditions, the resources are accessed always on the same order. In that way,
-		// one of the conditions that are required for a deadlock to happen is broken (making a transaction threadSafe).
+		// one of the conditions that are required for a deadlock to happen is broken (making a transaction thread-safe).
 		final List<String> sortedAccountsIds = Arrays.asList(sourceAccountId, targetAccountId);
 		sortedAccountsIds.sort(String::compareTo);
 
