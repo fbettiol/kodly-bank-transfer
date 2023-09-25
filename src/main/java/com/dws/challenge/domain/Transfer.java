@@ -1,5 +1,6 @@
 package com.dws.challenge.domain;
 
+import com.dws.challenge.validators.DifferentAccountsValidator;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -10,6 +11,7 @@ import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 @Data
+@DifferentAccountsValidator
 public class Transfer {
 	@NotNull
 	@NotEmpty

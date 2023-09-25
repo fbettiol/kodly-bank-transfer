@@ -4,9 +4,12 @@ import com.dws.challenge.domain.Account;
 import com.dws.challenge.exception.BankAccountNotFoundException;
 import com.dws.challenge.exception.InsufficientBalanceException;
 import com.dws.challenge.repository.AccountsRepository;
+import com.dws.challenge.service.LocksHandler;
 import com.dws.challenge.service.TransactionsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,6 +31,9 @@ class TransactionsServiceTest {
 
 	@MockBean
 	private AccountsRepository accountsRepository;
+
+	@MockBean
+	private LocksHandler locksHandler;
 
 	@Test
 	void transferMoney_failsOnNonexistentSourceAccount() {
@@ -78,11 +84,18 @@ class TransactionsServiceTest {
 		when(accountsRepository.getAccount("ac2")).thenReturn(ac2);
 
 		//When
-		this.uut.transferMoney("ac1", "ac2", new BigDecimal(50));
+		this.uut.transferMoney("ac2", "ac1", new BigDecimal(50));
 
 		//Then
-		assertEquals(new BigDecimal(50), ac1.getBalance());
-		assertEquals(new BigDecimal(150), ac2.getBalance());
+		assertEquals(new BigDecimal(150), ac1.getBalance());
+		assertEquals(new BigDecimal(50), ac2.getBalance());
+
+		//Check the locks are acquired in the right order
+		final InOrder orderVerifier = Mockito.inOrder(locksHandler);
+		orderVerifier.verify(locksHandler).lockAccount("ac1");
+		orderVerifier.verify(locksHandler).lockAccount("ac2");
+		orderVerifier.verify(locksHandler).unlockAccount("ac2");
+		orderVerifier.verify(locksHandler).unlockAccount("ac1");
 	}
 
 }
